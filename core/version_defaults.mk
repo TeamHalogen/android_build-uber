@@ -19,6 +19,7 @@
 #
 # Guarantees that the following are defined:
 #     PLATFORM_VERSION
+#     PLATFORM_HALOGEN_VERSION
 #     PLATFORM_SDK_VERSION
 #     PLATFORM_VERSION_CODENAME
 #     DEFAULT_APP_TARGET_SDK
@@ -43,6 +44,14 @@ ifeq "" "$(PLATFORM_VERSION)"
   # Update this value when the platform version changes (rather
   # than overriding it somewhere else).  Can be an arbitrary string.
   PLATFORM_VERSION := 6.0.1
+endif
+
+ifeq "" "$(PLATFORM_HALOGEN_VERSION)"
+  # This is the canonical definition of the halogenOS version,
+  # which is the version that we reveal to the end user.
+  # Update this value when the halogenOS version changes (rather
+  # than overriding it somewhere else).  Can be an arbitrary string.
+  PLATFORM_HALOGEN_VERSION := 0.0.1-dev
 endif
 
 ifeq "" "$(PLATFORM_SDK_VERSION)"
