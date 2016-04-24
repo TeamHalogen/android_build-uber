@@ -18,6 +18,7 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - sepgrep: Greps on all local sepolicy files.
 - sgrep:   Greps on all local source files.
 - godir:   Go to the directory containing a file.
+- chkbtm:  Check how long the build is running
 
 Environemnt options:
 - SANITIZE_HOST: Set to 'true' to use ASAN for all host modules. Note that
@@ -1486,6 +1487,20 @@ function make()
     echo -e " ####${color_reset}"
     echo
     return $ret
+}
+
+function checkbuildtime {
+  echo -en "\n\r\033[K\r"
+  while true
+  do
+    echo -en "\033[K\r\033[1A"
+    echo $(ps -eo etime,comm | grep "make$") | cut -d ' ' -f 1
+    sleep 1
+  done
+}
+
+function chkbtm {
+  checkbuildtime
 }
 
 if [ "x$SHELL" != "x/bin/bash" ]; then
