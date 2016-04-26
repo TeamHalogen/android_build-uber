@@ -21,7 +21,7 @@ echo "ro.build.host=`hostname`"
 echo "ro.build.tags=$BUILD_VERSION_TAGS"
 echo "ro.build.flavor=$TARGET_BUILD_FLAVOR"
 # This needs to be defined somewhere
-echo "ro.xos.version=$BUILD_HALOGEN_VERSION"
+echo "ro.xos.version=$PLATFORM_HALOGEN_VERSION"
 
 echo "ro.product.model=$PRODUCT_MODEL"
 echo "ro.product.brand=$PRODUCT_BRAND"
