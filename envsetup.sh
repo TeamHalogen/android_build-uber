@@ -1,6 +1,6 @@
 function hmm() {
 cat <<EOF
-Invoke ". build/envsetup.sh" from your shell to add the following functions to your environment:
+Invoke "source build/envsetup.sh" from your shell to add the following functions to your environment:
 - lunch:   lunch <product_name>-<build_variant>
 - tapas:   tapas [<App1> <App2> ...] [arm|x86|mips|armv5|arm64|x86_64|mips64] [eng|userdebug|user]
 - croot:   Changes directory to the top of the tree.
@@ -35,7 +35,7 @@ From xdtools (build/tools/xdtools.sh):
              - turbo:    Sync with 1000 threads
              - faster:   Sync with  200 threads
              - fast:     Sync with   64 threads
-             - auto:     Sync with cores * 2 (recommended) threads
+             - auto:     Sync with cores * 2 = $(($(grep -c ^processor /proc/cpuinfo) * 2)) (recommended) threads 
              - slow:     Sync with    6 threads
              - slower:   Sync with    2 threads
              - single:   Sync with    1 thread
