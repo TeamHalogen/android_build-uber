@@ -28,7 +28,8 @@ From xdtools (build/tools/xdtools.sh):
 ! Note: When building, build threads are automatically chosen.
 !       The available core count (or thread count on hyperthreading)
 !       is multiplied with 4, e.g. on 8 threads you have -j32.
-- build:    Build the whole ROM
+- build:    Build something
+             - full: Build the full ROM
 - buildapp: Build only a particular app
 - reposync: Sync the source tree
              - turbo:    Sync with 1000 threads
