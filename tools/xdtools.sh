@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#
+# Copyright (C) 2016 halogenOS (XOS)
+#
+#
+# This script was originally made by xdevs23 (http://github.com/xdevs23)
+# 
+
 DEBUG_ENABLED=0
 
 function logd() {

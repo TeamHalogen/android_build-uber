@@ -1,5 +1,13 @@
 #!/bin/bash
 
+#
+# Copyright (C) 2016 halogenOS (XOS)
+#
+#
+# This script was originally made by xdevs23 (http://github.com/xdevs23)
+# 
+
+
 function xdtools_help_build() {
 
 cat <<EOF
@@ -15,7 +23,7 @@ EOF
 
 function xdtools_build_no_target_device() {
     
-cat << EOF
+cat <<EOF
 No target device specified and \$TARGET_DEVICE is 
 undefined
 EOF
