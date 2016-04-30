@@ -125,6 +125,35 @@ case "$TOOL_ARG" in
         echo "Using $THREADS_REPO threads for sync."
         repo sync -j$THREADS_REPO --force-sync
     ;;
+
+    reposynclow)
+        REPO_ARG="$2"
+        THREADS_REPO=$THREAD_COUNT_N_BUILD
+        if [ -z "$2" ]; then REPO_ARG="auto"; fi
+        case $REPO_ARG in
+            turbo)      THREADS_REPO=1000       ;;
+            faster)     THREADS_REPO=200        ;;
+            fast)       THREADS_REPO=64         ;;
+            auto)                               ;;
+            slow)       THREADS_REPO=6          ;;
+            slower)     THREADS_REPO=2          ;;
+            single)     THREADS_REPO=1          ;;
+            easteregg)  THREADS_REPO=384        ;;
+            -h | --help | h | help | man )
+                echo "Syncs without cloning old branches and tags"
+                echo "(Fetches only that latest avaliable)"
+                echo "So you save on the extra bandwidth you've got!"
+                echo "Usage: reposynclow <speed>"
+                echo "Available speeds are:"
+                echo -en "  turbo\n  faster\n  fast\n  auto\n  slow\n"
+                echo -en "  slower\n  single\n  easteregg\n\n"
+                return 0
+            ;;
+            *) echo "Unknown argument \"$REPO_ARG\" for reposynclow ." ;;
+        esac
+        echo "Using $THREADS_REPO threads for sync."
+        repo sync -j$THREADS_REPO --force-sync -c -f --no-clone-bundle --no-tags
+    ;;
     
     debug)
         echo "Why should you be using debug as only argument? :D"
