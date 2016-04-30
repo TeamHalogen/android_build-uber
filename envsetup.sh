@@ -311,10 +311,14 @@ function addcompletions()
     dir="sdk/bash_completion"
     if [ -d ${dir} ]; then
         for f in `/bin/ls ${dir}/[a-z]*.bash 2> /dev/null`; do
-            echo -e "\e[34;1mincluding\e[0m $f"
+            echo -e "\e[34;1mIncluding\e[0m $f"
             . $f
         done
     fi
+    
+    echo -en "\033[1;38;5;39mIncluding\033[0m xdtools"
+    source build/tools/xdtools.sh envsetup
+    
 }
 
 function choosetype()
@@ -1708,26 +1712,6 @@ function checkbuildtime() {
 function chkbtm() {
   checkbuildtime
 }
-
-## BEGIN XDTOOLS FUNCTIONS
-
-function build() {
-    source $(gettop)/build/tools/xdtools.sh build $@
-}
-
-function buildapp() {
-    source $(gettop)/build/tools/xdtools.sh buildapp $@
-}
-
-function reposync() {
-    source $(gettop)/build/tools/xdtools.sh reposync $@
-}
-
-function reposynclow() {
-    source $(gettop)/build/tools/xdtools.sh reposynclow $@
-}
-
-## END XDTOOLS FUNCTIONS
 
 if [ "x$SHELL" != "x/bin/bash" ]; then
     case `ps -o command -p $$` in

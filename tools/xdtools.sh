@@ -13,14 +13,26 @@ function logd() {
     [ $DEBUG_ENABLED == 1 ] && echo "$@"
 }
 
-[[ "$@" == *"debug"* ]] && DEBUG_ENABLED=1 || DEBUG_ENABLED=0
+TOOL_ARG=""
+TOOL_SUBARG=""
+TOOL_THIRDARG=""
+function vardefine() {
+    [[ "$@" == *"debug"* ]] && DEBUG_ENABLED=1 || DEBUG_ENABLED=0
+    TOOL_ARG="$0"
+    TOOL_SUBARG="$1"
+    TOOL_THIRDARG="$2"
+    logd "TOOL_ARG=$TOOL_ARG"
+    logd "TOOL_SUBARG=$TOOL_SUBARG"
+    logd "TOOL_THIRDARG=$TOOL_THIRDARG"
+}
+vardefine
 
-logd "Script start"
-
-logd "Defining arg vars"
-TOOL_ARG="$1"
-TOOL_SUBARG="$2"
-TOOL_THIRDARG="$3"
+if [ "$1" == "envsetup" ]; then
+    TOOL_ARG="$1"
+    TOOL_SUBARG="$2"
+    TOOL_THIRDARG="$3"
+    echo -en "\n"
+fi
 
 logd "Checking cpu count"
 
@@ -30,14 +42,6 @@ THREAD_COUNT_N_BUILD=$(($CPU_COUNT * 2))
 
 logd "Saving current dir"
 BEGINNING_DIR="$(pwd)"
-
-
-logd "Checking if script is sourced"
-if [ "$0" == "bash" ]; then echo -en "\n"
-else
-    echo "The script must be sourced!"
-    return 990
-fi
 
 logd "Checking for envsetup"
 
@@ -65,81 +69,94 @@ function lunchauto() {
 
 logd "Checking arguments"
 
-case "$TOOL_ARG" in
-
-    build)
-        logd "Build!"
+function build() {
+    vardefine $@
+    logd "Build!"
+    
+    if [ -z "$TOOL_SUBARG" ]; then
+        xdtools_help_build
+        return 0
+    fi
+    
+    case "$TOOL_SUBARG" in
         
-        if [ -z "$TOOL_SUBARG" ]; then
-            xdtools_help_build
+        full)
+            if [ -z "$TOOL_THIRDARG" ] || [ ! -z "$TARGET_DEVICE" ]; then
+                xdtools_build_no_target_device
+            else
+                logd "Starting build..."
+                lunchauto
+                echo "Using $THREAD_COUNT_BUILD threads for build."
+                make -j$THREAD_COUNT_BUILD bacon
+            fi
+        ;;
+        *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
+    
+    esac
+}
+
+function buildapp() {
+    vardefine $@
+    echo "Building \"$TOOL_SUBARG\"..."
+    lunchauto
+    if [ -z "$TOOL_SUBARG" ]; then echo "No module name specified.";
+    else make -j4 clean; make -j$THREAD_COUNT_BUILD $TOOL_SUBARG
+    fi
+}
+
+function reposync() {
+    if [ "$1" == "low" ]; then
+        TOOL_ARG="reposynclow"
+        TOOL_SUBARG="$2"
+        TOOL_THIRDARG="$3"
+    else vardefine $@
+    fi
+    REPO_ARG="$TOOL_SUBARG"
+    THREADS_REPO=$THREAD_COUNT_N_BUILD
+    if [ -z "$TOOL_SUBARG" ]; then REPO_ARG="auto"; fi
+    case $REPO_ARG in
+        turbo)      THREADS_REPO=1000       ;;
+        faster)     THREADS_REPO=200        ;;
+        fast)       THREADS_REPO=64         ;;
+        auto)                               ;;
+        slow)       THREADS_REPO=6          ;;
+        slower)     THREADS_REPO=2          ;;
+        single)     THREADS_REPO=1          ;;
+        easteregg)  THREADS_REPO=384        ;;
+        -h | --help | h | help | man )
+            if [ $TOOL_ARG == "reposynclow" ]; then
+                echo "Syncs without cloning old branches and tags"
+                echo "(Fetches only that latest avaliable)"
+                echo "So you save on the extra bandwidth you've got!"
+            fi
+            echo "Usage: $TOOL_ARG <speed>"
+            echo "Available speeds are:"
+            echo -en "  turbo\n  faster\n  fast\n  auto\n  slow\n"
+            echo -en "  slower\n  single\n  easteregg\n\n"
             return 0
-        fi
-        
-        case "$TOOL_SUBARG" in
-            
-            full)
-                if [ -z "$3" ] || [ ! -z "$TARGET_DEVICE" ]; then
-                    xdtools_build_no_target_device
-                else
-                    logd "Starting build..."
-                    lunchauto
-                    echo "Using $THREAD_COUNT_BUILD threads for build."
-                    make -j$THREAD_COUNT_BUILD bacon
-                fi
-            ;;
-            *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
-        
-        esac
-        
-    ;;
-    
-    buildapp)
-        lunchauto
-        if [ -z "$TOOL_SUBARG" ]; then echo "No module name specified.";
-        else make -j4 clean; make -j$THREAD_COUNT_BUILD $TOOL_SUBARG
-        fi
-    ;;
-    
-    reposync | reposynclow)
-        REPO_ARG="$2"
-        THREADS_REPO=$THREAD_COUNT_N_BUILD
-        if [ -z "$2" ]; then REPO_ARG="auto"; fi
-        case $REPO_ARG in
-            turbo)      THREADS_REPO=1000       ;;
-            faster)     THREADS_REPO=200        ;;
-            fast)       THREADS_REPO=64         ;;
-            auto)                               ;;
-            slow)       THREADS_REPO=6          ;;
-            slower)     THREADS_REPO=2          ;;
-            single)     THREADS_REPO=1          ;;
-            easteregg)  THREADS_REPO=384        ;;
-            -h | --help | h | help | man )
-                if [ $TOOL_ARG == "reposynclow" ]; then
-                    echo "Syncs without cloning old branches and tags"
-                    echo "(Fetches only that latest avaliable)"
-                    echo "So you save on the extra bandwidth you've got!"
-                fi
-                echo "Usage: $TOOL_ARG <speed>"
-                echo "Available speeds are:"
-                echo -en "  turbo\n  faster\n  fast\n  auto\n  slow\n"
-                echo -en "  slower\n  single\n  easteregg\n\n"
-                return 0
-            ;;
-            *) echo "Unknown argument \"$REPO_ARG\" for reposync ." ;;
-        esac
-        echo "Using $THREADS_REPO threads for sync."
-        [ $TOOL_ARG == "reposynclow" ] && echo "Saving bandwidth for free!"
-        repo sync -j$THREADS_REPO  --force-sync $([ $TOOL_ARG == "reposynclow" ] \
-            && echo -en "-c -f --no-clone-bundle --no-tags" || echo -en "")
+        ;;
+        *) echo "Unknown argument \"$REPO_ARG\" for reposync ." ;;
+    esac
+    echo "Using $THREADS_REPO threads for sync."
+    [ $TOOL_ARG == "reposynclow" ] && echo "Saving bandwidth for free!"
+    repo sync -j$THREADS_REPO  --force-sync $([ "$TOOL_ARG" == "reposynclow" ] \
+        && echo -en "-c -f --no-clone-bundle --no-tags" || echo -en "")
+}
+
+function reposynclow() {
+    reposync low $@
+}
+
+alias debug="echo \"Why should you be using debug as only argument? :D \""
+
+case "$TOOL_ARG" in
+    build | buildapp | reposync | reposynclow | debug)
+        $TOOL_ARG
     ;;
 
-    debug)
-        echo "Why should you be using debug as only argument? :D"
-    ;;
+    envsetup);;
     
-    
-    
-    "")     echo "No argument specified."                           ;;
+    "");;
     *)      echo "Unknown argument \"$TOOL_ARG\"."                  ;;
     
 esac
