@@ -24,6 +24,7 @@ THREAD_COUNT_N_BUILD=$(($CPU_COUNT * 2))
 logd "Saving current dir"
 BEGINNING_DIR="$(pwd)"
 
+
 logd "Checking if script is sourced"
 if [ "$0" == "bash" ]; then echo -en "\n"
 else
@@ -43,6 +44,9 @@ if [ "$(declare -f breakfast > /dev/null; echo $?)" == 1 ]; then
     cd $BEGINNING_DIR
 fi
 
+logd "Sourcing help file"
+source $(gettop)/build/tools/xdtoolshelp.sh
+
 function lunchauto() {
     logd "Lunching..."
     BUILD_TARGET_DEVICE=""
@@ -59,15 +63,16 @@ case "$TOOL_ARG" in
     build)
         logd "Build!"
         
+        if [ -z "$TOOL_SUBARG" ]; then
+            xdtools_help_build
+            return 0
+        fi
+        
         case "$TOOL_SUBARG" in
             
             full)
                 if [ -z "$3" ] || [ ! -z "$TARGET_DEVICE" ]; then
-                    echo \ 
-                            '
-                            No target device specified and $TARGET_DEVICE is 
-                            undefined
-                            '
+                    xdtools_build_no_target_device
                 else
                     logd "Starting build..."
                     lunchauto
