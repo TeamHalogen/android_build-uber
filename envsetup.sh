@@ -39,6 +39,15 @@ From xdtools (build/tools/xdtools.sh):
              - slow:     Sync with    6 threads
              - slower:   Sync with    2 threads
              - single:   Sync with    1 thread
+- reposynclow: Sync the source tree using low bandwidth
+               Won't fetch old tags and branches
+             - turbo:    Sync with 1000 threads
+             - faster:   Sync with  200 threads
+             - fast:     Sync with   64 threads
+             - auto:     Sync with cores * 2 = $(($(grep -c ^processor /proc/cpuinfo) * 2)) (recommended) threads 
+             - slow:     Sync with    6 threads
+             - slower:   Sync with    2 threads
+             - single:   Sync with    1 thread
 (i) You can use the 'debug' argument anywhere in the command to see the log
 
 Environemnt options:
@@ -1721,6 +1730,10 @@ function buildapp() {
 
 function reposync() {
     source $(gettop)/build/tools/xdtools.sh reposync $@
+}
+
+function reposynclow() {
+    source $(gettop)/build/tools/xdtools.sh reposynclow $@
 }
 
 ## END XDTOOLS FUNCTIONS
