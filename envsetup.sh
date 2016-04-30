@@ -24,6 +24,22 @@ Invoke ". build/envsetup.sh" from your shell to add the following functions to y
 - chkbtm:  Check how long the build is running
 - pushboot:Push a file from your OUT dir to your phone and reboots it, using absolute path.
 
+From xdtools (build/tools/xdtools.sh):
+! Note: When building, build threads are automatically chosen.
+!       The available core count (or thread count on hyperthreading)
+!       is multiplied with 4, e.g. on 8 threads you have -j32.
+- build:    Build the whole ROM
+- buildapp: Build only a particular app
+- reposync: Sync the source tree
+             - turbo:    Sync with 1000 threads
+             - faster:   Sync with  200 threads
+             - fast:     Sync with   64 threads
+             - auto:     Sync with cores * 2 (recommended) threads
+             - slow:     Sync with    6 threads
+             - slower:   Sync with    2 threads
+             - single:   Sync with    1 thread
+(i) You can use the 'debug' argument anywhere in the command to see the log
+
 Environemnt options:
 - SANITIZE_HOST: Set to 'true' to use ASAN for all host modules. Note that
                  ASAN_OPTIONS=detect_leaks=0 will be set by default until the
@@ -1678,7 +1694,7 @@ function make()
     return $ret
 }
 
-function checkbuildtime {
+function checkbuildtime() {
   echo -en "\n\r\033[K\r"
   while true
   do
@@ -1688,9 +1704,25 @@ function checkbuildtime {
   done
 }
 
-function chkbtm {
+function chkbtm() {
   checkbuildtime
 }
+
+## BEGIN XDTOOLS FUNCTIONS
+
+function build() {
+    source $(gettop)/build/tools/xdtools.sh build $@
+}
+
+function buildapp() {
+    source $(gettop)/build/tools/xdtools.sh buildapp $@
+}
+
+function reposync() {
+    source $(gettop)/build/tools/xdtools.sh reposync $@
+}
+
+## END XDTOOLS FUNCTIONS
 
 if [ "x$SHELL" != "x/bin/bash" ]; then
     case `ps -o command -p $$` in
