@@ -39,6 +39,7 @@ From xdtools (build/tools/xdtools.sh):
              - slow:     Sync with    6 threads
              - slower:   Sync with    2 threads
              - single:   Sync with    1 thread
+- reporesync: Resync sources (use 'reporesync help' to learn more)
 (i) You can use the 'debug' argument anywhere in the command to see the log
 
 Environemnt options:

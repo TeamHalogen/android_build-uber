@@ -16,11 +16,15 @@ function logd() {
 TOOL_ARG=""
 TOOL_SUBARG=""
 TOOL_THIRDARG=""
+TOOL_4ARG=""
+TOOL_5ARG=""
 function vardefine() {
     [[ "$@" == *"debug"* ]] && DEBUG_ENABLED=1 || DEBUG_ENABLED=0
     TOOL_ARG="$0"
     TOOL_SUBARG="$1"
     TOOL_THIRDARG="$2"
+    TOOL_4ARG="$3"
+    TOOL_5ARG="$4"
     logd "TOOL_ARG=$TOOL_ARG"
     logd "TOOL_SUBARG=$TOOL_SUBARG"
     logd "TOOL_THIRDARG=$TOOL_THIRDARG"
@@ -31,6 +35,8 @@ if [ "$1" == "envsetup" ]; then
     TOOL_ARG="$1"
     TOOL_SUBARG="$2"
     TOOL_THIRDARG="$3"
+    TOOL_4ARG="$4"
+    TOOL_5ARG="$5"
     echo -en "\n"
 fi
 
@@ -140,11 +146,66 @@ function reposync() {
     echo "Using $THREADS_REPO threads for sync."
     [ $TOOL_ARG == "reposynclow" ] && echo "Saving bandwidth for free!"
     repo sync -j$THREADS_REPO  --force-sync $([ "$TOOL_ARG" == "reposynclow" ] \
-        && echo -en "-c -f --no-clone-bundle --no-tags" || echo -en "")
+        && echo -en "-c -f --no-clone-bundle --no-tags" || echo -en "") $TOOL_THIRDARG
 }
 
 function reposynclow() {
     reposync low $@
+}
+
+function reporesync() {
+    vardefine $@
+    FRSTDIR=$(pwd)
+    cd $(gettop)
+    case "$TOOL_SUBARG" in
+    
+        full | full-x | "full-local")
+
+            $ALLFD=$(ls -a)
+            for $ff in $ALLFD; do
+                case "$ff" in
+                    "." | ".." | ".repo");;
+                    *)
+                        rm -rf $ff
+                    ;;
+                esac
+            done
+            if [ "$TOOL_SUBARG" == "full-x" ]; then
+                rm -rf .repo/projects/*
+                rm -rf .repo/project-objects/*
+            fi
+            if [ "$TOOL_SUBARG" == "full-local" ]; then
+                repo sync -j$THREAD_COUNT_N_BUILD --local-only --force-sync
+            else [[ "$@" == *"low"* ]] && reposynclow || reposync fast
+            fi
+        ;;
+
+        
+        repo | repo-x | "repo-local")
+            [ -z "$TOOL_THIRDARG" ] && xdtools_help_reporesync && return 0
+            [ "$TOOL_SUBARG" == "repo-x" ] && [ -z "$TOOL_4ARG" ] && \
+                xdtools_help_reporesync && return 0
+            rm -rf $TOOL_THIRDARG
+            if [ "$TOOL_SUBARG" == "repo-x" ]; then
+                rm -rf .repo/project-objects/$TOOL_4ARG.git
+                rm -rf .repo/projects/$TOOL_THIRDARG.git
+            fi
+            if [ "$TOOL_SUBARG" == "repo-local" ]; then
+                repo sync $TOOL_THIRDARG -j$THREAD_COUNT_N_BUILD \
+                    --local-only --force-sync --force-broken
+            else [[ "$@" == *"low"* ]] && reposynclow auto $TOOL_THIRDARG || \
+                reposync auto $TOOL_THIRDARG
+            fi
+        ;;
+        
+        "" | help | *)
+            xdtools_help_reporesync
+            cd $FRSTDIR
+            return 0
+        ;;
+    
+    esac
+    cd $FRSTDIR
 }
 
 alias debug="echo \"Why should you be using debug as only argument? :D \""
