@@ -40,6 +40,7 @@ From xdtools (build/tools/xdtools.sh):
              - slower:   Sync with    2 threads
              - single:   Sync with    1 thread
 - reporesync: Resync sources (use 'reporesync help' to learn more)
+- repair-repo:Repair the Google Repo tool (Removes it and downloads again)
 (i) You can use the 'debug' argument anywhere in the command to see the log
 
 Environemnt options:
