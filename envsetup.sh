@@ -41,6 +41,27 @@ From xdtools (build/tools/xdtools.sh):
              - single:   Sync with    1 thread
 - reporesync: Resync sources (use 'reporesync help' to learn more)
 - repair-repo:Repair the Google Repo tool (Removes it and downloads again)
+- mkgradleproject: Make a gradle project including build and debug files for make!
+                     This awesome feature makes your current project gradle-compatible
+                     You will be able to import it into Android Studio. To keep
+                     the project still buildable, we don't use gradle to build.
+                     Instead, it will use the make tool to build the module.
+                     The added files won't be tracked by git. That means that you
+                     can make the gradle project without having to worry about
+                     having bloat in your git repositories! Additionally, you
+                     have some great scripts to build, debug, install and test
+                     the app. Use 'source debugapp.sh' to make, install, start
+                     and debug your project!
+                     By the way, a few files will be shown to you in the nano
+                     file editor. There you need to check the variables and change
+                     things as you need.
+                    Example:
+                        cd packages/apps/inputmethods/java/
+                        mkgradleproject
+                     This will download some useful tools, make the gradle project
+                     for you and remove the tools again to keep a clean working
+                     tree.
+                     
 (i) You can use the 'debug' argument anywhere in the command to see the log
 
 Environemnt options:

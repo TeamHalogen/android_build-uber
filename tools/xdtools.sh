@@ -64,6 +64,10 @@ fi
 logd "Sourcing help file"
 source $(gettop)/build/tools/xdtoolshelp.sh
 
+function echoe() {
+    echo -e "$@"
+}
+
 function lunchauto() {
     logd "Lunching..."
     BUILD_TARGET_DEVICE=""
@@ -227,6 +231,18 @@ function repair-repo() {
     echo -e "\033[1mRepair complete!\033[0m"
     
     cd $FRSTDIR
+}
+
+function mkgradleproject() {
+    USFF="usefulscriptsxd-uniquep-f"
+    echoe "\033[1mDownloading necessary tools...\033[0m"
+    git clone https://github.com/xdevs23/usefulscriptsxd.git $USFF>/dev/null
+    echoe "\033[1mStarting script for making gradle project...\033[0m"
+    export XD_AOSP_TEMPLATE_PATH="./$USFF/AOSPTemplate"
+    bash $USFF/scripts/makegradleproject.sh $1
+    echoe "\033[1mRemoving temporary tools...\033[0m"
+    rm -rf $USFF
+    echoe "\033[1mFinished!\033[0m"
 }
 
 alias debug="echo \"Why should you be using debug as only argument? :D \""
