@@ -208,6 +208,27 @@ function reporesync() {
     cd $FRSTDIR
 }
 
+function repair-repo() {
+    echo -e "\033[1mPrepairing to repair repo...\033[0m"
+    FRSTDIR=$(pwd)
+    cd $(gettop)
+    
+    cd .repo/repo
+    REPO_URL=$(echo -en $(git remote -v | cut -d ' ' -f 1 | awk 'BEGIN {FS="\t"} {print $2}') | cut -d ' ' -f 1)
+    
+    echo "  Found $REPO_URL as remote"
+    
+    cd $(gettop)/.repo
+    
+    echo -e "\033[1mDownloading repo...\033[0m"
+    [ -e "repo" ] && rm -rf repo
+    git clone $REPO_URL repo
+    
+    echo -e "\033[1mRepair complete!\033[0m"
+    
+    cd $FRSTDIR
+}
+
 alias debug="echo \"Why should you be using debug as only argument? :D \""
 
 case "$TOOL_ARG" in
