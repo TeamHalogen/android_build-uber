@@ -62,7 +62,7 @@ if [ "$(declare -f breakfast > /dev/null; echo $?)" == 1 ]; then
 fi
 
 logd "Sourcing help file"
-source $(gettop)/build/tools/xdtoolshelp.sh
+source $(gettop)/build/tools/xdtools/xdtoolshelp.sh
 
 function echoe() {
     echo -e "$@"
@@ -234,14 +234,10 @@ function repair-repo() {
 }
 
 function mkgradleproject() {
-    USFF="usefulscriptsxd-uniquep-f"
-    echoe "\033[1mDownloading necessary tools...\033[0m"
-    git clone https://github.com/xdevs23/usefulscriptsxd.git $USFF>/dev/null
     echoe "\033[1mStarting script for making gradle project...\033[0m"
-    export XD_AOSP_TEMPLATE_PATH="./$USFF/AOSPTemplate"
+    USFF="$(gettop)/build/tools/xdtools/usefulscriptsxd"
+    export XD_AOSP_TEMPLATE_PATH="$USFF/AOSPTemplate"
     bash $USFF/scripts/makegradleproject.sh $1
-    echoe "\033[1mRemoving temporary tools...\033[0m"
-    rm -rf $USFF
     echoe "\033[1mFinished!\033[0m"
 }
 
