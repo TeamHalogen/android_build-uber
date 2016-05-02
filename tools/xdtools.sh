@@ -88,21 +88,28 @@ function build() {
         return 0
     fi
     
-    case "$TOOL_SUBARG" in
-        
-        full)
-            if [ -z "$TOOL_THIRDARG" ] || [ ! -z "$TARGET_DEVICE" ]; then
-                xdtools_build_no_target_device
-            else
+    if [ -z "$TOOL_THIRDARG" ] || [ ! -z "$TARGET_DEVICE" ]; then
+        xdtools_build_no_target_device
+    else
+        case "$TOOL_SUBARG" in
+            
+            full)
                 logd "Starting build..."
                 lunchauto
                 echo "Using $THREAD_COUNT_BUILD threads for build."
                 make -j$THREAD_COUNT_BUILD bacon
-            fi
-        ;;
-        *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
-    
-    esac
+            ;;
+            
+            module)
+                logd "Starting build of module..."
+                lunchauto
+                echo "Using $THREAD_COUNT_BUILD threads for build."
+                make -j$THREAD_COUNT_BUILD $TOOL_4ARG
+            ;;
+            *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
+        
+        esac
+    fi
 }
 
 function buildapp() {
