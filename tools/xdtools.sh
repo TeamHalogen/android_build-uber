@@ -93,18 +93,14 @@ function build() {
     else
         case "$TOOL_SUBARG" in
             
-            full)
+            full | module)
                 logd "Starting build..."
+                BUILD_TARGET_MODULE="bacon"
                 lunchauto
+                [ "$TOOL_5ARG" != "noclean" ] && make -j4 clean
+                [ "$TOOL_SUBARG" == "module" ] && $BUILD_TARGET_MODULE="$TOOL_4ARG"
                 echo "Using $THREAD_COUNT_BUILD threads for build."
-                make -j$THREAD_COUNT_BUILD bacon
-            ;;
-            
-            module)
-                logd "Starting build of module..."
-                lunchauto
-                echo "Using $THREAD_COUNT_BUILD threads for build."
-                make -j$THREAD_COUNT_BUILD $TOOL_4ARG
+                make -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE
             ;;
             *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
         

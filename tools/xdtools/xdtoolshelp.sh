@@ -11,11 +11,13 @@
 function xdtools_help_build() {
 
 cat <<EOF
-Usage: build <target> [lunch target] [module]
+Usage: build <target> [lunch target] [module] [noclean]
 
 Targets:
     full        Full ROM (bacon)
     module      Build only a specific module
+    
+noclean: use this option to skip cleaning before building
 
 You have to specify the lunch target if you haven't lunched yet.
 EOF
