@@ -16,6 +16,8 @@ Usage: build <target> [lunch target] [module] [noclean]
 Targets:
     full        Full ROM (bacon)
     module      Build only a specific module
+    mm          Builds using mmma. Useful for frameworks or modules
+                which you want to build using mmma/mmm/
     
 noclean: use this option to skip cleaning before building
 
