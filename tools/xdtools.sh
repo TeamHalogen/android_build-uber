@@ -106,6 +106,7 @@ function build() {
                 lunchauto
                 [ "$TOOL_5ARG" != "noclean" ] && make -j4 clean
                 [ "$TOOL_SUBARG" == "module" ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
+                [ "$TOOL_SUBARG" == "mm" ]     && BUILD_TARGET_MODULE="$TOOL_4ARG"
                 echo "Using $THREAD_COUNT_BUILD threads for build."
                 [ "$TOOL_SUBARG" != "mm" ] && \
                     make -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE \
