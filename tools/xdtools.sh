@@ -19,6 +19,11 @@ TOOL_THIRDARG=""
 TOOL_4ARG=""
 TOOL_5ARG=""
 function vardefine() {
+    TOOL_ARG=""
+    TOOL_SUBARG=""
+    TOOL_THIRDARG=""
+    TOOL_4ARG=""
+    TOOL_5ARG=""
     [[ "$@" == *"debug"* ]] && DEBUG_ENABLED=1 || DEBUG_ENABLED=0
     TOOL_ARG="$0"
     TOOL_SUBARG="$1"
@@ -162,25 +167,33 @@ function reposynclow() {
 
 function reporesync() {
     vardefine $@
-    FRSTDIR=$(pwd)
+    echoe "Preparing..."
+    FRSTDIR="$(pwd)"
     cd $(gettop)
     case "$TOOL_SUBARG" in
     
         full | full-x | "full-local")
-
-            $ALLFD=$(ls -a)
-            for $ff in $ALLFD; do
+            echoe "Collecting directories..."
+            ALLFD=$(echo -en $(ls -a))
+            echoe "Removing directories..."
+            echo -en "\n\r"
+            for ff in $ALLFD; do
                 case "$ff" in
                     "." | ".." | ".repo");;
                     *)
-                        rm -rf $ff
+                        echo -en "\rRemoving $ff\033[K"
+                        rm -rf "$ff"
                     ;;
                 esac
             done
+            echo -en "\n"
             if [ "$TOOL_SUBARG" == "full-x" ]; then
+                echoe "Removing repo projects..."
                 rm -rf .repo/projects/*
+                echoe "Removing repo objects..."
                 rm -rf .repo/project-objects/*
             fi
+            echoe "Starting sync..."
             if [ "$TOOL_SUBARG" == "full-local" ]; then
                 repo sync -j$THREAD_COUNT_N_BUILD --local-only --force-sync
             else [[ "$@" == *"low"* ]] && reposynclow || reposync fast
@@ -216,12 +229,18 @@ function reporesync() {
 }
 
 function repair-repo() {
+    vardefine $@
     echo -e "\033[1mPrepairing to repair repo...\033[0m"
     FRSTDIR=$(pwd)
     cd $(gettop)
     
-    cd .repo/repo
-    REPO_URL=$(echo -en $(git remote -v | cut -d ' ' -f 1 | awk 'BEGIN {FS="\t"} {print $2}') | cut -d ' ' -f 1)
+    if [ -e ".repo/repo" ]; then
+        cd .repo/repo
+        REPO_URL=$(echo -en $(git remote -v | cut -d ' ' -f 1 | awk 'BEGIN {FS="\t"} {print $2}') | cut -d ' ' -f 1)
+    fi
+    
+    [[ "$REPO_URL" != *"git"* ]] && REPO_URL="https://github.com/halogenOS/git-repo.git"
+    [ ! -z "$TOOL_SUBARG" ] && REPO_URL="$TOOL_SUBARG"
     
     echo "  Found $REPO_URL as remote"
     
