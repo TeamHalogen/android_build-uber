@@ -74,11 +74,13 @@ function echoe() {
 }
 
 function lunchauto() {
-    logd "Lunching..."
     BUILD_TARGET_DEVICE=""
-    if [ ! -z $TOOL_THIRDARG ]; then BUILD_TARGET_DEVICE="$TOOL_THIRDARG";
-    else                             BUILD_TARGET_DEVICE=""
+    if [ ! -z "$TOOL_THIRDARG" ]; then BUILD_TARGET_DEVICE="$TOOL_THIRDARG";
+    else                               BUILD_TARGET_DEVICE=""
     fi
+    echoe "Eating breakfast..."
+    breakfast $BUILD_TARGET_DEVICE
+    echoe "Lunching..."
     lunch $BUILD_TARGET_DEVICE
 }
 
@@ -103,7 +105,7 @@ function build() {
                 BUILD_TARGET_MODULE="bacon"
                 lunchauto
                 [ "$TOOL_5ARG" != "noclean" ] && make -j4 clean
-                [ "$TOOL_SUBARG" == "module" ] && $BUILD_TARGET_MODULE="$TOOL_4ARG"
+                [ "$TOOL_SUBARG" == "module" ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
                 echo "Using $THREAD_COUNT_BUILD threads for build."
                 make -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE
             ;;
