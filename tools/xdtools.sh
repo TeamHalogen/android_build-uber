@@ -24,6 +24,8 @@ function vardefine() {
     TOOL_THIRDARG=""
     TOOL_4ARG=""
     TOOL_5ARG=""
+    BUILD_TARGET_DEVICE=""
+    BUILD_TARGET_MODULE=""
     [[ "$@" == *"debug"* ]] && DEBUG_ENABLED=1 || DEBUG_ENABLED=0
     TOOL_ARG="$0"
     TOOL_SUBARG="$1"
@@ -73,6 +75,10 @@ function echoe() {
     echo -e "$@"
 }
 
+function echob() {
+    echo -e "\033[1m$@\033[0m"
+}
+
 function lunchauto() {
     BUILD_TARGET_DEVICE=""
     if [ ! -z "$TOOL_THIRDARG" ]; then BUILD_TARGET_DEVICE="$TOOL_THIRDARG";
@@ -101,10 +107,11 @@ function build() {
         case "$TOOL_SUBARG" in
             
             full | module | mm)
-                logd "Starting build..."
+                echob "Starting build..."
                 BUILD_TARGET_MODULE="bacon"
                 lunchauto
-                [ "$TOOL_5ARG" != "noclean" ] && make -j4 clean
+                ( [ "$TOOL_5ARG" == "noclean" ] || [ "$TOOL_4ARG" == "noclean" ] ) \
+                    || make -j4 clean
                 [ "$TOOL_SUBARG" == "module" ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
                 [ "$TOOL_SUBARG" == "mm" ]     && BUILD_TARGET_MODULE="$TOOL_4ARG"
                 echo "Using $THREAD_COUNT_BUILD threads for build."
@@ -112,6 +119,26 @@ function build() {
                     make -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE \
                     || \
                     mmma -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE
+            ;;
+            
+            nothing)
+                echob "Starting build..."
+                BUILD_TARGET_MODULE="bacon"
+                echoe "Note: You have specified to build \033[4mnothing\033[0m."
+                echo -n "Skip clean: " && \
+                    ( [ "$TOOL_5ARG" == "noclean" ] || [ "$TOOL_4ARG" == "noclean" ] ) \
+                    && echo "yes" || echo "no"
+                [ "$TOOL_THIRDARG" == "module" ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
+                [ "$TOOL_THIRDARG" == "mm" ]     && BUILD_TARGET_MODULE="$TOOL_4ARG"
+                echo "BUILD_TARGET_MODULE=$BUILD_TARGET_MODULE"
+                echo "You are doing a '$TOOL_THIRDARG' build."
+                echo "Using $THREAD_COUNT_BUILD threads for build."
+                echoe "\nBuild command: "
+                [ "$TOOL_SUBARG" != "mm" ] && \
+                    echo -n "make -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE" \
+                    || \
+                    echo -n "mmma -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE"
+                echo -en "\n"
             ;;
             *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
         
