@@ -23,6 +23,7 @@
 PRODUCT_PACKAGES += \
     BasicDreams \
     Browser \
+    CalendarProvider \
     CaptivePortalLogin \
     CertInstaller \
     Contacts \
