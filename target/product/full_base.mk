@@ -27,10 +27,6 @@ PRODUCT_PACKAGES := \
     libwnndict \
     WAPPushManager
 
-PRODUCT_PACKAGES += \
-    LiveWallpapersPicker \
-    PhotoTable
-
 # Additional settings used in all AOSP builds
 PRODUCT_PROPERTY_OVERRIDES := \
     ro.config.ringtone=Titania.ogg \
