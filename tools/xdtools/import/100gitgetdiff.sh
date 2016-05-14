@@ -4,6 +4,9 @@ function repo-getdiff() {
     if [ -z "$1" ]; then
         echo "No head point specified. Please specify one. Example: HEAD~2"
         return 0
+    elif [[ "$1" == *"help"* ]]; then
+        gitgetdiff_help_usage
+        return 0
     fi
     CRTDIR="$(pwd)"
     cd $(gettop)
