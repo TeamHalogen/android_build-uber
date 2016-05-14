@@ -68,8 +68,13 @@ if [ "$(declare -f breakfast > /dev/null; echo $?)" == 1 ]; then
     cd $BEGINNING_DIR
 fi
 
-logd "Sourcing help file"
-source $(gettop)/build/tools/xdtools/xdtoolshelp.sh
+function echoxcc() {
+    echo -en "\033[1;38;5;39m$@\033[0m"
+}
+
+function echoxc() {
+    echoxcc "\033[1;38;5;39m$@\033[0m\n"
+}
 
 function echoe() {
     echo -e "$@"
@@ -78,6 +83,17 @@ function echoe() {
 function echob() {
     echo -e "\033[1m$@\033[0m"
 }
+
+logd "Sourcing help file"
+source $(gettop)/build/tools/xdtools/xdtoolshelp.sh
+
+logd "Importing other files"
+XD_IMPORT_PATH="$(gettop)/build/tools/xdtools/import"
+for f in "$(ls $XD_IMPORT_PATH/)"; do
+    echoxcc "  Importing "
+    echob "$f..."
+    source $XD_IMPORT_PATH/$f
+done
 
 function lunchauto() {
     BUILD_TARGET_DEVICE=""
