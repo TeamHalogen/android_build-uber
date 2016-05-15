@@ -91,7 +91,7 @@ logd "Importing other files"
 XD_IMPORT_PATH="$(gettop)/build/tools/xdtools/import"
 for f in $(ls $XD_IMPORT_PATH/); do
     echoxcc "  Importing "
-    echob "$f..."
+    echo "$f..."
     source $XD_IMPORT_PATH/$f
 done
 
