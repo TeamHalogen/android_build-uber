@@ -314,18 +314,6 @@ function mkgradleproject() {
 
 alias debug="echo \"Why should you be using debug as only argument? :D \""
 
-case "$TOOL_ARG" in
-    build | buildapp | reposync | reposynclow | debug)
-        $TOOL_ARG
-    ;;
-
-    envsetup);;
-    
-    "");;
-    *)      echo "Unknown argument \"$TOOL_ARG\"."                  ;;
-    
-esac
-
 logd "Cd back to beginning dir"
 
 cd $BEGINNING_DIR
