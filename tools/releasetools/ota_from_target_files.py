@@ -1168,7 +1168,10 @@ class FileDifference(object):
       for src, tgt in self.renames.iteritems():
         print "Renaming " + src + " to " + tgt.name
         script.RenameFile(src, tgt.name)
-
+        
+if block_based:
+   script.Print("Moving Some Applications to /data/app ")
+   script.MoveAppsToData()
 
 def WriteIncrementalOTAPackage(target_zip, source_zip, output_zip):
   target_has_recovery_patch = HasRecoveryPatch(target_zip)
