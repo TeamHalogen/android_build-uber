@@ -149,6 +149,24 @@ class EdifyGenerator(object):
       self.script.append('set_metadata("/tmp/backuptool.sh", "uid", 0, "gid", 0, "mode", 0755);')
       self.script.append('set_metadata("/tmp/backuptool.functions", "uid", 0, "gid", 0, "mode", 0644);')
     self.script.append(('run_program("/tmp/backuptool.sh", "%s");' % command))
+    
+    
+  def MoveAppsToData(self):
+  	self.script.append('run_program("/sbin/busybox", "mount", "-o", "remount,rw", "/data");')
+  	self.script.append('run_program("/sbin/busybox", "cd", "/");')
+  	self.script.append('run_program("/sbin/busybox", "mkdir", "-p", "/data/appd");')
+  	self.script.append('run_program("/sbin/busybox", "chmod", "771", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/Browser", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/Camera2", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/DeskClock", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/Eleven", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/ExactCalculator", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/Gallery2", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/HTMLViewer", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/priv-app/Launcher3", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/SoundRecorder", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/Stk", "/data/app");')
+  	self.script.append('run_program("/sbin/busybox", "mv", "/system/app/Terminal", "/data/app");')
 
   def ShowProgress(self, frac, dur):
     """Update the progress bar, advancing it over 'frac' over the next
