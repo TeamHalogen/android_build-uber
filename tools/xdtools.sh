@@ -312,6 +312,30 @@ function mkgradleproject() {
     echoe "\033[1mFinished!\033[0m"
 }
 
+XD_REPO_MERGETAG=""
+XD_MY_BRANCH=""
+
+function repo-setmergetag() {
+    XD_REPO_MERGETAG="$1"
+    echob "Tag set to $XD_REPO_MERGETAG"
+}
+
+function repo-domerge() {
+    [ -z "$XD_REPO_MERGETAG" ] && \
+        echob "Merge tag not defined. use repo-setmergetag <tag> to set a tag." && \
+        return
+    git remote add caf git://source.codeaurora.org/$1;
+    if [ -z "$2" ]; then
+        [ -z "$XD_MY_BRANCH" ] && \
+            XD_MY_BRANCH="$(echo -en $(repo branch | grep "XOS"))"
+    else
+        XD_MY_BRANCH="$2"
+    fi
+    git checkout $XD_MY_BRANCH;
+    git fetch --tags caf;
+    git merge $XD_REPO_MERGETAG;
+}
+
 alias debug="echo \"Why should you be using debug as only argument? :D \""
 
 logd "Cd back to beginning dir"
