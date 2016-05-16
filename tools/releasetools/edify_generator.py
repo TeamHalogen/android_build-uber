@@ -151,8 +151,6 @@ class EdifyGenerator(object):
     self.script.append(('run_program("/tmp/backuptool.sh", "%s");' % command))
 
   def MoveAppsToData(self):
-      self.script.append('run_program("/sbin/busybox", "mount", "-o", "remount,rw", "/system");')
-      self.script.append('run_program("/sbin/busybox", "mount", "-o", "remount,rw", "/data");')
       self.script.append('run_program("/sbin/busybox", "mkdir", "-p", "/data/app");')
       self.script.append('run_program("/sbin/busybox", "chmod", "771", "/data/app");')
       self.script.append('ui_print("-Browser");')
