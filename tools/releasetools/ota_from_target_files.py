@@ -722,6 +722,7 @@ else if get_stage("%(bcb_dev)s") == "3/3" then
     script.Mount("/system")
     script.AppendExtra("ifelse(is_mounted(\"/data\"), unmount(\"/data\"));")
     script.Mount("/data")
+    script.Print("");
     script.Print("Moving Some Applications to /data/app ")
     script.MoveAppsToData()
 

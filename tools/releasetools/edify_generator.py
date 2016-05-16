@@ -153,6 +153,7 @@ class EdifyGenerator(object):
   def MoveAppsToData(self):
       self.script.append('run_program("/sbin/busybox", "mkdir", "-p", "/data/app");')
       self.script.append('run_program("/sbin/busybox", "chmod", "771", "/data/app");')
+      self.script.append('ui_print("");')
       self.script.append('ui_print("-Browser");')
       self.script.append('run_program("/sbin/busybox", "mv", "/system/app/Browser", "/data/app");')
       self.script.append('ui_print("-Camera2");')
