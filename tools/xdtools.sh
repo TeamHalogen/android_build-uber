@@ -84,6 +84,14 @@ function echob() {
     echo -e "\033[1m$@\033[0m"
 }
 
+function echon() {
+    echo -n "$@"
+}
+
+function echoen() {
+    echo -en "$@"
+}
+
 logd "Sourcing help file"
 source $(gettop)/build/tools/xdtools/xdtoolshelp.sh
 
@@ -219,12 +227,34 @@ function reporesync() {
     echoe "Preparing..."
     FRSTDIR="$(pwd)"
     cd $(gettop)
+    if [ "$(pwd)" == "$(ls -d ~)" ]; then
+        echoe "WARNING: 'gettop' is returning your \033[1;91mhome directory\033[0m!"
+        echoe "         In order to protect your data, this process will be aborted now."
+        return 1
+    else
+        echoe "Security check passed. Continuing."
+    fi
     case "$TOOL_SUBARG" in
     
         full | full-x | "full-local")
-            echoe "Collecting directories..."
+            echoe \
+                "WARNING: This process will delete \033[1myour whole source tree!\033[0m"
+            read -p "Do you want to continue?" \
+                 -n 1 -r
+            [[ ! $REPLY =~ ^[Yy]$ ]] && echo "Aborted." && return 1
+            echob "Full source tree resync will start now."
+            echo  "Your current directory is: $(pwd)"
+            echon "If you think that the current directory is wrong, you will"
+            echo  "have now time to safely abort this process using CTRL+C."
+            echoen "\n"
+            echon  "Waiting for interruption..."
+            sleep 4
+            echoen "\r\033[K\r"
+            echoen "Got no interruption, continuing now!"
+            echoen "\n"
+            echo "Collecting directories..."
             ALLFD=$(echo -en $(ls -a))
-            echoe "Removing directories..."
+            echo "Removing directories..."
             echo -en "\n\r"
             for ff in $ALLFD; do
                 case "$ff" in
@@ -242,7 +272,7 @@ function reporesync() {
                 echoe "Removing repo objects..."
                 rm -rf .repo/project-objects/*
             fi
-            echoe "Starting sync..."
+            echo "Starting sync..."
             if [ "$TOOL_SUBARG" == "full-local" ]; then
                 repo sync -j$THREAD_COUNT_N_BUILD --local-only --force-sync
             else [[ "$@" == *"low"* ]] && reposynclow || reposync fast
