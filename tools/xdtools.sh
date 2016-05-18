@@ -54,7 +54,7 @@ function vardefine() {
 # Run this when the script is being imported, just in case
 vardefine
 
-# Now make sure variables are assigned correctly to the pased arguments
+# Now make sure variables are assigned correctly to the passed arguments
 # when using envsetup
 if [ "$1" == "envsetup" ]; then
     TOOL_ARG="$1"
@@ -69,7 +69,7 @@ logd "Checking cpu count"
 
 # Get the CPU count
 # CPU count is either your virtual cores when using Hyperthreading
-# or your physical CPU count when not using Hyperthreading
+# or your physical core count when not using Hyperthreading
 # Here the virtual cores are always counted, which can be the same as
 # physical cores if not using Hyperthreading or a similar feature.
 CPU_COUNT=$(grep -c ^processor /proc/cpuinfo)
