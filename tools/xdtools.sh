@@ -8,6 +8,8 @@
 # This script was originally made by xdevs23 (http://github.com/xdevs23)
 # 
 
+
+
 DEBUG_ENABLED=0
 
 function logd() {
@@ -19,6 +21,7 @@ TOOL_SUBARG=""
 TOOL_THIRDARG=""
 TOOL_4ARG=""
 TOOL_5ARG=""
+
 function vardefine() {
     TOOL_ARG=""
     TOOL_SUBARG=""
@@ -37,6 +40,7 @@ function vardefine() {
     logd "TOOL_SUBARG=$TOOL_SUBARG"
     logd "TOOL_THIRDARG=$TOOL_THIRDARG"
 }
+
 vardefine
 
 if [ "$1" == "envsetup" ]; then
@@ -60,8 +64,8 @@ BEGINNING_DIR="$(pwd)"
 logd "Checking for envsetup"
 
 if [ "$(declare -f breakfast > /dev/null; echo $?)" == 1 ]; then
-    if [ -f "envsetup.sh" ]; then cd ..;  source build/envsetup.sh
-    elif [ -f "build/envsetup.sh" ]; then source build/envsetup.sh
+    if   [ -f "envsetup.sh"       ]; then cd ..; source build/envsetup.sh
+    elif [ -f "build/envsetup.sh" ]; then        source build/envsetup.sh
     else
         echo "envsetup.sh not found. CD to the root of the source tree first."
         return 860
@@ -126,7 +130,8 @@ function build() {
         return 0
     fi
     
-    if [ -z "$TOOL_THIRDARG" ] || [ ! -z "$TARGET_DEVICE" ]; then
+    if [   -z "$TOOL_THIRDARG" ] || \
+       [ ! -z "$TARGET_DEVICE" ]; then
         xdtools_build_no_target_device
     else
         case "$TOOL_SUBARG" in
@@ -137,10 +142,11 @@ function build() {
                 lunchauto
                 ( [ "$TOOL_5ARG" == "noclean" ] || [ "$TOOL_4ARG" == "noclean" ] ) \
                     || make -j4 clean
+                
                 [ "$TOOL_SUBARG" == "module" ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
-                [ "$TOOL_SUBARG" == "mm" ]     && BUILD_TARGET_MODULE="$TOOL_4ARG"
+                [ "$TOOL_SUBARG" == "mm"     ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
                 echo "Using $THREAD_COUNT_BUILD threads for build."
-                [ "$TOOL_SUBARG" != "mm" ] && \
+                [ "$TOOL_SUBARG" != "mm"     ] && \
                     make -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE \
                     || \
                     mmma -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE
@@ -165,6 +171,7 @@ function build() {
                     echo -n "mmma -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE"
                 echo -en "\n"
             ;;
+            
             *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
         
         esac
@@ -175,9 +182,8 @@ function buildapp() {
     vardefine $@
     echo "Building \"$TOOL_SUBARG\"..."
     lunchauto
-    if [ -z "$TOOL_SUBARG" ]; then echo "No module name specified.";
-    else make -j4 clean; make -j$THREAD_COUNT_BUILD $TOOL_SUBARG
-    fi
+    [ -z "$TOOL_SUBARG" ] && echo "No module name specified." \
+        || make -j4 clean; make -j$THREAD_COUNT_BUILD $TOOL_SUBARG
 }
 
 function reposync() {
@@ -189,7 +195,7 @@ function reposync() {
     fi
     REPO_ARG="$TOOL_SUBARG"
     THREADS_REPO=$THREAD_COUNT_N_BUILD
-    if [ -z "$TOOL_SUBARG" ]; then REPO_ARG="auto"; fi
+    [ -z "$TOOL_SUBARG" ] && REPO_ARG="auto"
     case $REPO_ARG in
         turbo)      THREADS_REPO=1000       ;;
         faster)     THREADS_REPO=200        ;;
@@ -213,6 +219,7 @@ function reposync() {
         ;;
         *) echo "Unknown argument \"$REPO_ARG\" for reposync ." ;;
     esac
+    
     echo "Using $THREADS_REPO threads for sync."
     [ $TOOL_ARG == "reposynclow" ] && echo "Saving bandwidth for free!"
     repo sync -j$THREADS_REPO  --force-sync $([ "$TOOL_ARG" == "reposynclow" ] \
@@ -233,7 +240,7 @@ function reporesync() {
         echoe "         In order to protect your data, this process will be aborted now."
         return 1
     else
-        echoe "Security check passed. Continuing."
+        echob "Security check passed. Continuing."
     fi
     case "$TOOL_SUBARG" in
     
@@ -320,7 +327,7 @@ function repair-repo() {
     fi
     
     [[ "$REPO_URL" != *"git"* ]] && REPO_URL="https://github.com/halogenOS/git-repo.git"
-    [ ! -z "$TOOL_SUBARG" ] && REPO_URL="$TOOL_SUBARG"
+    [ ! -z "$TOOL_SUBARG"      ] && REPO_URL="$TOOL_SUBARG"
     
     echo "  Found $REPO_URL as remote"
     
@@ -367,9 +374,7 @@ function repo-domerge() {
     git merge $XD_REPO_MERGETAG;
 }
 
-alias debug="echo \"Why should you be using debug as only argument? :D \""
-
-logd "Cd back to beginning dir"
+logd "Change directory back to beginning dir"
 
 cd $BEGINNING_DIR
 
