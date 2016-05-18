@@ -3,6 +3,7 @@
 #
 # Copyright (C) 2016 halogenOS (XOS)
 #
+
 #
 # This script was originally made by xdevs23 (http://github.com/xdevs23)
 # 
@@ -239,12 +240,12 @@ function reporesync() {
         full | full-x | "full-local")
             echoe \
                 "WARNING: This process will delete \033[1myour whole source tree!\033[0m"
-            read -p "Do you want to continue?" \
+            read -p "Do you want to continue? [y\N] : " \
                  -n 1 -r
-            [[ ! $REPLY =~ ^[Yy]$ ]] && echo "Aborted." && return 1
+            [[ ! $REPLY =~ ^[Yy]$ ]] && echoe "\nAborted." && return 1
             echob "Full source tree resync will start now."
             echo  "Your current directory is: $(pwd)"
-            echon "If you think that the current directory is wrong, you will"
+            echon "If you think that the current directory is wrong, you will "
             echo  "have now time to safely abort this process using CTRL+C."
             echoen "\n"
             echon  "Waiting for interruption..."
