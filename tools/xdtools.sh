@@ -9,19 +9,29 @@
 # 
 
 
+### DEBUG SECTION START
 
+# This variable should not be changed in the script
+# It is automatically set in runtime
 DEBUG_ENABLED=0
 
+# Print a debug message to screen if $DEBUG_ENABLED == 1
 function logd() {
     [ $DEBUG_ENABLED == 1 ] && echo "$@"
 }
 
+### DEBUG SECTION END
+
+### VARIABLE DEFINITION START
+
+# Define empty variables
 TOOL_ARG=""
 TOOL_SUBARG=""
 TOOL_THIRDARG=""
 TOOL_4ARG=""
 TOOL_5ARG=""
 
+# Make sure variables are clean before using them
 function vardefine() {
     TOOL_ARG=""
     TOOL_SUBARG=""
@@ -41,8 +51,11 @@ function vardefine() {
     logd "TOOL_THIRDARG=$TOOL_THIRDARG"
 }
 
+# Run this when the script is being imported, just in case
 vardefine
 
+# Now make sure variables are assigned correctly to the pased arguments
+# when using envsetup
 if [ "$1" == "envsetup" ]; then
     TOOL_ARG="$1"
     TOOL_SUBARG="$2"
@@ -54,13 +67,28 @@ fi
 
 logd "Checking cpu count"
 
+# Get the CPU count
+# CPU count is either your virtual cores when using Hyperthreading
+# or your physical CPU count when not using Hyperthreading
+# Here the virtual cores are always counted, which can be the same as
+# physical cores if not using Hyperthreading or a similar feature.
 CPU_COUNT=$(grep -c ^processor /proc/cpuinfo)
+# Use 4 times the CPU count to build
 THREAD_COUNT_BUILD=$(($CPU_COUNT * 4))
+# Use doubled CPU count to sync (auto)
 THREAD_COUNT_N_BUILD=$(($CPU_COUNT * 2))
 
+# Save the current directory before continuing the script.
+# The working directory might change during the execution of specific
+# functions, which should be set back to the beginning directory
+# so the user does not need to do that manually.
 logd "Saving current dir"
 BEGINNING_DIR="$(pwd)"
 
+### VARIABLE DEFINITION END
+
+# Check if envsetup has already been run if the script is running
+# in standalone mode, which should not be the case
 logd "Checking for envsetup"
 
 if [ "$(declare -f breakfast > /dev/null; echo $?)" == 1 ]; then
@@ -73,33 +101,45 @@ if [ "$(declare -f breakfast > /dev/null; echo $?)" == 1 ]; then
     cd $BEGINNING_DIR
 fi
 
+### BASIC FUNCTIONS START
+
+# Echo with halogen color without new line
 function echoxcc() {
     echo -en "\033[1;38;5;39m$@\033[0m"
 }
 
+# Echo with halogen color with new line
 function echoxc() {
     echoxcc "\033[1;38;5;39m$@\033[0m\n"
 }
 
+# Echo with new line and respect escape characters
 function echoe() {
     echo -e "$@"
 }
 
+# Echo with line, respect escape characters and print in bold font
 function echob() {
     echo -e "\033[1m$@\033[0m"
 }
 
+# Echo without new line
 function echon() {
     echo -n "$@"
 }
 
+# Echo without new line and respect escape characters
 function echoen() {
     echo -en "$@"
 }
 
+### BASIC FUNCTIONS END
+
+# Import help functions
 logd "Sourcing help file"
 source $(gettop)/build/tools/xdtools/xdtoolshelp.sh
 
+# Import all other scripts in the import/ directory
 logd "Importing other files"
 XD_IMPORT_PATH="$(gettop)/build/tools/xdtools/import"
 for f in $(ls $XD_IMPORT_PATH/); do
@@ -108,6 +148,7 @@ for f in $(ls $XD_IMPORT_PATH/); do
     source $XD_IMPORT_PATH/$f
 done
 
+# Handle the kitchen and automatically eat lunch if hungry
 function lunchauto() {
     BUILD_TARGET_DEVICE=""
     if [ ! -z "$TOOL_THIRDARG" ]; then BUILD_TARGET_DEVICE="$TOOL_THIRDARG";
@@ -121,30 +162,38 @@ function lunchauto() {
 
 logd "Checking arguments"
 
+# Build function
 function build() {
     vardefine $@
     logd "Build!"
     
+    # Display help if no argument passed    
     if [ -z "$TOOL_SUBARG" ]; then
         xdtools_help_build
         return 0
     fi
     
+    # Notify that no target device could be found
     if [   -z "$TOOL_THIRDARG" ] || \
        [ ! -z "$TARGET_DEVICE" ]; then
         xdtools_build_no_target_device
     else
+        # Handle the first argument
         case "$TOOL_SUBARG" in
             
             full | module | mm)
                 echob "Starting build..."
+                # The default module is bacon, no matter what you specify
                 BUILD_TARGET_MODULE="bacon"
+                # Of course let's check the kitchen
                 lunchauto
+                # Now clean if wanted
                 ( [ "$TOOL_5ARG" == "noclean" ] || [ "$TOOL_4ARG" == "noclean" ] ) \
                     || make -j4 clean
-                
+                # Decide which type of build we need
                 [ "$TOOL_SUBARG" == "module" ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
                 [ "$TOOL_SUBARG" == "mm"     ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
+                # Now start building
                 echo "Using $THREAD_COUNT_BUILD threads for build."
                 [ "$TOOL_SUBARG" != "mm"     ] && \
                     make -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE \
@@ -152,15 +201,23 @@ function build() {
                     mmma -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE
             ;;
             
+            # Use 'build nothing' to test the build feature without building
+            # anything
             nothing)
                 echob "Starting build..."
+                # Default module is bacon, no matter what you specify
                 BUILD_TARGET_MODULE="bacon"
+                # Now let's print an useless message for experienced developers
                 echoe "Note: You have specified to build \033[4mnothing\033[0m."
+                # Tell the user if he has specified to clean or not
                 echo -n "Skip clean: " && \
                     ( [ "$TOOL_5ARG" == "noclean" ] || [ "$TOOL_4ARG" == "noclean" ] ) \
                     && echo "yes" || echo "no"
+                # Now decide which build type we need
                 [ "$TOOL_THIRDARG" == "module" ] && BUILD_TARGET_MODULE="$TOOL_4ARG"
                 [ "$TOOL_THIRDARG" == "mm" ]     && BUILD_TARGET_MODULE="$TOOL_4ARG"
+                # Print some probably useful lines to let the girl or guy behind
+                # the machine know what's going on
                 echo "BUILD_TARGET_MODULE=$BUILD_TARGET_MODULE"
                 echo "You are doing a '$TOOL_THIRDARG' build."
                 echo "Using $THREAD_COUNT_BUILD threads for build."
@@ -172,12 +229,16 @@ function build() {
                 echo -en "\n"
             ;;
             
+            # Oops.
             *)      echo "Unknown build command \"$TOOL_SUBARG\"."    ;;
         
         esac
     fi
 }
 
+# You can also build the app using this command, but it is just like
+# build module <target device> <module>, just less to write
+# Very useful for lazy people like me.
 function buildapp() {
     vardefine $@
     echo "Building \"$TOOL_SUBARG\"..."
@@ -186,16 +247,24 @@ function buildapp() {
         || make -j4 clean; make -j$THREAD_COUNT_BUILD $TOOL_SUBARG
 }
 
+# Reposync!! Laziness is taking over.
+# Sync with special features and traditional repo.
 function reposync() {
+    # You have slow internet? You don't want to consume the whole bandwidth?
+    # Ok, then just use "reposynclow" instead of "reposync"
     if [ "$1" == "low" ]; then
         TOOL_ARG="reposynclow"
         TOOL_SUBARG="$2"
         TOOL_THIRDARG="$3"
     else vardefine $@
     fi
+    # Same variable definition stuff as always
     REPO_ARG="$TOOL_SUBARG"
     THREADS_REPO=$THREAD_COUNT_N_BUILD
+    # Automatic!
     [ -z "$TOOL_SUBARG" ] && REPO_ARG="auto"
+    # Let's decide how much threads to use
+    # Self-explanatory.
     case $REPO_ARG in
         turbo)      THREADS_REPO=1000       ;;
         faster)     THREADS_REPO=200        ;;
@@ -205,6 +274,7 @@ function reposync() {
         slower)     THREADS_REPO=2          ;;
         single)     THREADS_REPO=1          ;;
         easteregg)  THREADS_REPO=384        ;;
+        # People might want to get some good help
         -h | --help | h | help | man )
             if [ $TOOL_ARG == "reposynclow" ]; then
                 echo "Syncs without cloning old branches and tags"
@@ -217,51 +287,79 @@ function reposync() {
             echo -en "  slower\n  single\n  easteregg\n\n"
             return 0
         ;;
+        # Oops...
         *) echo "Unknown argument \"$REPO_ARG\" for reposync ." ;;
     esac
     
+    # Sync!! Use the power of shell scripting!
     echo "Using $THREADS_REPO threads for sync."
     [ $TOOL_ARG == "reposynclow" ] && echo "Saving bandwidth for free!"
     repo sync -j$THREADS_REPO  --force-sync $([ "$TOOL_ARG" == "reposynclow" ] \
         && echo -en "-c -f --no-clone-bundle --no-tags" || echo -en "") $TOOL_THIRDARG
 }
 
+# Slow sync? Alright!
 function reposynclow() {
     reposync low $@
 }
 
+# This is repoREsync. It REsyncs. Self-explanatory?
 function reporesync() {
     vardefine $@
     echoe "Preparing..."
     FRSTDIR="$(pwd)"
+    # Let's cd to the top of the working tree
+    # Hoping that we don't land in the home directory.
     cd $(gettop)
+    # Critical security check to prevent deleting home directory if the build
+    # directory has been removed from the work tree for whatever reason.
     if [ "$(pwd)" == "$(ls -d ~)" ]; then
+        # Let's warn the user about this bad state.
         echoe "WARNING: 'gettop' is returning your \033[1;91mhome directory\033[0m!"
         echoe "         In order to protect your data, this process will be aborted now."
         return 1
     else
+        # Oh yeah, we passed!
         echob "Security check passed. Continuing."
     fi
-    case "$TOOL_SUBARG" in
     
+    # Now let's handle the first argument as always
+    case "$TOOL_SUBARG" in
+        
+        # Do a full sync
+        #   full:       just delete the working tree directories and sync normally
+        #   full-x:     delete everything except manifest and repo tool, means
+        #               you need to resync everything again.
+        #   full-local: don't update the repositories, only do a full resync locally
         full | full-x | "full-local")
+            # Print a very important message
             echoe \
                 "WARNING: This process will delete \033[1myour whole source tree!\033[0m"
+            # Ask if the girl or guy really wants to continue.
             read -p "Do you want to continue? [y\N] : " \
                  -n 1 -r
+            # Check the reply.
             [[ ! $REPLY =~ ^[Yy]$ ]] && echoe "\nAborted." && return 1
+            # Print some lines of words
             echob "Full source tree resync will start now."
+            # Just in case...
             echo  "Your current directory is: $(pwd)"
+            # ... read the printed lines so you know what's going on.
             echon "If you think that the current directory is wrong, you will "
             echo  "have now time to safely abort this process using CTRL+C."
             echoen "\n"
             echon  "Waiting for interruption..."
+            # Wait 4 lovely seconds which can save your life
             sleep 4
+            # Wipe out the above line, now it is redundant
             echoen "\r\033[K\r"
             echoen "Got no interruption, continuing now!"
             echoen "\n"
+            # Collect all directories found in the top of the working tree
+            # like build, abi, art, bionic, cts, dalvik, external, device, ...
             echo "Collecting directories..."
             ALLFD=$(echo -en $(ls -a))
+            # Remove these directories and show the user the beautiful progress
             echo "Removing directories..."
             echo -en "\n\r"
             for ff in $ALLFD; do
@@ -274,20 +372,25 @@ function reporesync() {
                 esac
             done
             echo -en "\n"
+            # If the user also wants to delete project objects... just do it.
             if [ "$TOOL_SUBARG" == "full-x" ]; then
                 echoe "Removing repo projects..."
                 rm -rf .repo/projects/*
                 echoe "Removing repo objects..."
                 rm -rf .repo/project-objects/*
             fi
+            # And let's sync!
             echo "Starting sync..."
             if [ "$TOOL_SUBARG" == "full-local" ]; then
                 repo sync -j$THREAD_COUNT_N_BUILD --local-only --force-sync
             else [[ "$@" == *"low"* ]] && reposynclow || reposync fast
             fi
         ;;
-
         
+        # Does a partial resync
+        #    repo:        just delete the directory of the source and sync
+        #    repo-x:      Redownload the whole project
+        #    repo-local:  just delete the directory and do a local sync
         repo | repo-x | "repo-local")
             [ -z "$TOOL_THIRDARG" ] && xdtools_help_reporesync && return 0
             [ "$TOOL_SUBARG" == "repo-x" ] && [ -z "$TOOL_4ARG" ] && \
@@ -305,6 +408,7 @@ function reporesync() {
             fi
         ;;
         
+        # Help me!
         "" | help | *)
             xdtools_help_reporesync
             cd $FRSTDIR
@@ -315,17 +419,20 @@ function reporesync() {
     cd $FRSTDIR
 }
 
+# Repair the repo tool for whatever reason
 function repair-repo() {
     vardefine $@
     echo -e "\033[1mPrepairing to repair repo...\033[0m"
     FRSTDIR=$(pwd)
     cd $(gettop)
     
+    # Get the remote URL if possible
     if [ -e ".repo/repo" ]; then
         cd .repo/repo
         REPO_URL=$(echo -en $(git remote -v | cut -d ' ' -f 1 | awk 'BEGIN {FS="\t"} {print $2}') | cut -d ' ' -f 1)
     fi
     
+    # Otherwise use our remote
     [[ "$REPO_URL" != *"git"* ]] && REPO_URL="https://github.com/halogenOS/git-repo.git"
     [ ! -z "$TOOL_SUBARG"      ] && REPO_URL="$TOOL_SUBARG"
     
@@ -333,15 +440,18 @@ function repair-repo() {
     
     cd $(gettop)/.repo
     
+    # Redownload the tool
     echo -e "\033[1mDownloading repo...\033[0m"
     [ -e "repo" ] && rm -rf repo
     git clone $REPO_URL repo
     
+    # Done
     echo -e "\033[1mRepair complete!\033[0m"
     
     cd $FRSTDIR
 }
 
+# Make a gradle project out of a normal AOSP source project!
 function mkgradleproject() {
     echoe "\033[1mStarting script for making gradle project...\033[0m"
     USFF="$(gettop)/build/tools/xdtools/usefulscriptsxd"
@@ -350,14 +460,17 @@ function mkgradleproject() {
     echoe "\033[1mFinished!\033[0m"
 }
 
+# Some vars
 XD_REPO_MERGETAG=""
 XD_MY_BRANCH=""
 
+# Set a tag to use later.
 function repo-setmergetag() {
     XD_REPO_MERGETAG="$1"
     echob "Tag set to $XD_REPO_MERGETAG"
 }
 
+# Merge the tag into the current directory, use the specified path
 function repo-domerge() {
     [ -z "$XD_REPO_MERGETAG" ] && \
         echob "Merge tag not defined. use repo-setmergetag <tag> to set a tag." && \
@@ -373,6 +486,8 @@ function repo-domerge() {
     git fetch --tags caf;
     git merge $XD_REPO_MERGETAG;
 }
+
+# Rest is self-explanatory
 
 logd "Change directory back to beginning dir"
 
