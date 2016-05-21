@@ -331,7 +331,7 @@ function reporesync() {
         #   full-x:     delete everything except manifest and repo tool, means
         #               you need to resync everything again.
         #   full-local: don't update the repositories, only do a full resync locally
-        full | full-x | "full-local")
+        full | full-x | "full-local" | full-network | full-network-x)
             # Print a very important message
             echoe \
                 "WARNING: This process will delete \033[1myour whole source tree!\033[0m"
@@ -373,7 +373,8 @@ function reporesync() {
             done
             echo -en "\n"
             # If the user also wants to delete project objects... just do it.
-            if [ "$TOOL_SUBARG" == "full-x" ]; then
+            if [ "$TOOL_SUBARG" == "full-x" ] || \
+               [ "$TOOL_SUBARG" == "full-network-x" ]; then
                 echoe "Removing repo projects..."
                 rm -rf .repo/projects/*
                 echoe "Removing repo objects..."
@@ -383,7 +384,9 @@ function reporesync() {
             echo "Starting sync..."
             if [ "$TOOL_SUBARG" == "full-local" ]; then
                 repo sync -j$THREAD_COUNT_N_BUILD --local-only --force-sync
-            else [[ "$@" == *"low"* ]] && reposynclow || reposync fast
+            else [[ "$@" == *"low"* ]] && reposynclow || reposync fast \
+                $([[ "$TOOL_SUBARG" == "full-network"* ]] && \
+                    echo -n "--network-only" || echo -n "")
             fi
         ;;
         
