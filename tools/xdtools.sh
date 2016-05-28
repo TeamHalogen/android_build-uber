@@ -201,6 +201,20 @@ function build() {
                     mmma -j$THREAD_COUNT_BUILD $BUILD_TARGET_MODULE
             ;;
             
+            module-list)
+                echob "Starting batch build..."
+                shift 2
+                ALL_MODULES_TO_BUILD="$@"
+                make clean
+                for module in $ALL_MODULES_TO_BUILD; do
+                    echo
+                    echob "Building module $module"
+                    echo
+                    build module $TOOL_THIRDARG $module noclean
+                done
+                echob "Finished batch build"
+            ;;
+            
             # Use 'build nothing' to test the build feature without building
             # anything
             nothing)
