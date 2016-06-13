@@ -36,7 +36,7 @@ function recleanbranch() {
     echob "Moving \"$REMOTEBRANCH\" to \"$BRANCH\"..."
     git branch --move $BRANCH
     echob "Building commits on top of new branch"
-    git cherry-pick --ff $BEGINCOMMIT..$ENDCOMMIT
+    git cherry-pick --ff $BEGINCOMMIT^..$ENDCOMMIT
     echob "Ready to be pushed, push using: "
     echob "git push -f --set-upstream <your remote> $BRANCH"
     echo  "If you notice that something went wrong, you can restore the old"
